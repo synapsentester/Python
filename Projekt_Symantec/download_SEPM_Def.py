@@ -61,8 +61,10 @@ os.makedirs(DOWNLOAD_DIR, exist_ok=True)
 timestamp_str = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
 log_file = os.path.join(DOWNLOAD_DIR, f"download_log_{timestamp_str}_HUMAN.log")
 csv_file = os.path.join(DOWNLOAD_DIR, f"download_log_{timestamp_str}_MACHINE.csv")
+ndjson_file = os.path.join(DOWNLOAD_DIR, f"download_log_{timestamp_str}_MACHINE.ndjson")
 
-# CSV-Header schreiben
+
+# CSV-Header schreiben (ACHTUNG: könnte gelöscht werden da auf NDJSON umgestiegen)
 with open(csv_file, "w", newline="", encoding="utf-8") as f:
     writer = csv.writer(f)
     writer.writerow(
@@ -76,7 +78,7 @@ with open(csv_file, "w", newline="", encoding="utf-8") as f:
             "Status",
         ]
     )
-
+# (ACHTUNG: könnte gelöscht werden da auf NDJSON umgestiegen)
 
 def log_console_and_file(
     message,
@@ -86,29 +88,35 @@ def log_console_and_file(
     local_path="",
     local_md5="",
     status="",
-    write_csv=False,
+    write_csv=False,  # bleibt für Kompatibilität, wird aber ignoriert
 ):
-    timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    # Log für Konsole / .log-Datei
+    timestamp = datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ")
+
+    # Konsole und Human-Log (.log)
     console_message = f"[{timestamp}] [Kategorie: {category}] {message}"
     print(console_message)
     with open(log_file, "a", encoding="utf-8") as f:
         f.write(console_message + "\n")
-    # Log für CSV nur wenn write_csv=True
-    if write_csv and (url or local_path):
-        with open(csv_file, "a", newline="", encoding="utf-8") as f:
-            writer = csv.writer(f)
-            writer.writerow(
-                [
-                    timestamp,
-                    category,
-                    url,
-                    web_hash or "N/A",
-                    local_path or "N/A",
-                    local_md5 or "N/A",
-                    status or "N/A",
-                ]
-            )
+
+    # NDJSON-Objekt schreiben
+    if url or local_path:
+        ndjson_entry = {
+            "timestamp": timestamp,
+            "category": category,
+            "source_url": url,
+            #"expected_hash": web_hash or "N/A",
+            "expected_hash": (web_hash or "N/A").lower(),
+            "local_path": local_path or "N/A",
+            #"calculated_hash": local_md5 or "N/A",
+            "calculated_hash": (local_md5 or "N/A").lower(),
+            "status": status or "N/A",
+        }
+        try:
+            with open(ndjson_file, "a", encoding="utf-8") as f:
+                f.write(json.dumps(ndjson_entry, ensure_ascii=False) + "\n")
+        except Exception as e:
+            print(f"Fehler beim Schreiben des NDJSON-Logs: {e}")
+
 
 
 # --- Datei herunterladen ---
@@ -234,4 +242,6 @@ os.startfile(DOWNLOAD_DIR)
 # Logdateien ins Archiv kopieren
 os.makedirs(ARCHIV_DIR, exist_ok=True)
 shutil.copy2(csv_file, ARCHIV_DIR)
+shutil.copy2(ndjson_file, ARCHIV_DIR)
+
 # ...TSCHÜSS...
