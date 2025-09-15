@@ -1,0 +1,10 @@
+{
+  "download_dir": "C:\\LocDump\\SEP_DEF",
+  "archiv_dir": "C:\\LocLogFile\\LogArchivSymantec",
+  "pages": {
+    "File-Based Protection": "https://www.broadcom.com/support/security-center/definitions/download/detail?gid=sep14",
+    "Network-Based Protection (IPS)": "https://www.broadcom.com/support/security-center/definitions/download/detail?gid=ips14",
+    "Aggregated Protection": "https://www.broadcom.com/support/security-center/definitions/download/detail?gid=sef",
+    "Behavior-Based Protection": "https://www.broadcom.com/support/security-center/definitions/download/detail?gid=sonar"
+  }
+}
