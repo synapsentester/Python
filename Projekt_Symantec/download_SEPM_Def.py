@@ -241,7 +241,7 @@ os.startfile(DOWNLOAD_DIR)
 
 # Logdateien ins Archiv kopieren
 os.makedirs(ARCHIV_DIR, exist_ok=True)
-shutil.copy2(csv_file, ARCHIV_DIR)
+#shutil.copy2(csv_file, ARCHIV_DIR)
 shutil.copy2(ndjson_file, ARCHIV_DIR)
 
 # ...TSCHÜSS...
